@@ -15,3 +15,9 @@ def getGoal():
     goal["current"] = int(BookService.getFinishedCount(gloVar.goalStartTime, gloVar.goalEndTime))
     goal["percent"] = str(round(goal["current"] / int(gloVar.goal) * 100, 5))
     return Response(json.dumps(goal), mimetype='application/json')
+
+
+@indexRoute.route('/getWeeks',methods=["POST"])
+def getWeeks():
+    count = request.form.get("count")
+    return Response(WeekReadTimeService.getWeeks(count), mimetype='application/json')

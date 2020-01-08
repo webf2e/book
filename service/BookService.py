@@ -92,7 +92,7 @@ def getFinishedCount(startTime, endTime):
         database=gloVar.dbName
     )
     cursor = db.cursor()
-    sql = "select count(id) from book where finishTime is not null and finishTime > '"+startTime+"' and finishTime < '"+endTime+"'"
+    sql = "select count(id) from book where isNew = 1 and finishTime is not null and finishTime > '"+startTime+"' and finishTime < '"+endTime+"'"
     logging.warning("[sql]:{}".format(sql))
     cursor.execute(sql)
     data = cursor.fetchall()

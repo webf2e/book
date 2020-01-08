@@ -68,6 +68,9 @@
                     </td>
                     <td><button id="addWeekTimeBtn" class="btn btn-primary">提交</button></td>
                 </tr>
+                <tr>
+                    <td colspan="3" id="addWeekMsg"></td>
+                </tr>
             </table>
           </div>
         </div>
@@ -180,7 +183,7 @@
             type:"POST",
             data:"date=" + $("#weekDate").val() + "&hour="+$("#weekHour").val() + "&min="+$("#weekMin").val(),
             success:function(data){
-
+                $("#addWeekMsg").html("添加成功");
             }
         });
     });

@@ -51,6 +51,24 @@ def getByStartTime(startTime):
     return changeToJsonStr(fields, data)
 
 
+def getWeeks(count):
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "select * from weekReadTime order by endTime asc limit 0," + str(count)
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    fields = cursor.description
+    db.commit()
+    db.close()
+    return changeToJsonStr(fields, data)
+
+
 def changeToJsonStr(fields,data):
     finalResult = "["
     column_list = []

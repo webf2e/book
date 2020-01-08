@@ -42,6 +42,8 @@
             </table>
           </div>
         </div>
+
+        <div id="weekTimeChart" style="width: 100%;height: 350px"></div>
     </div>
 </body>
 <script src="/static/js/jquery.min.js"></script>
@@ -54,17 +56,79 @@
 
     getGoal();
 
+    getWeeks();
+
     function getGoal(){
         $.ajax({
             url:urlPrefix + "/getGoal",
             type:"POST",
             success:function(data){
-                $("#goalMsg").html("目标：从" + data["start"].split(" ")[0] + "到" + data["end"].split(" ")[0]+"，读完" + data["goal"] + "本书");
+                $("#goalMsg").html("目标：从" + data["start"].split(" ")[0] + "到" + data["end"].split(" ")[0]+"，读完" + data["goal"] + "本书<br>当前已经读完" + data["current"] + "本");
                 $("#goalProcess").html("<div class=\"progress\">\n" +
                     "  <div class=\"progress-bar progress-bar-striped active\" role=\"progressbar\" aria-valuenow=\""+data["percent"]+"\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: "+data["percent"]+"%\">\n" +
                     +data["percent"]+"%\n" +
                     "  </div>\n" +
                     "</div>");
+            }
+        });
+    }
+
+    function getWeeks(){
+        $.ajax({
+            url:urlPrefix + "/getWeeks",
+            type:"POST",
+            data:"count=54",
+            success:function(result){
+                var time = [];
+                var data = [];
+                $.each(result, function(i,n){
+                    console.log(n);
+                    time.push(n["endTime"]);
+                    data.push(n["readMin"]);
+                });
+                console.log(time);
+                console.log(data);
+                var option = {
+                    title: {
+                        text: '每周读书时长统计',
+                    },
+                    color: ['#3398DB'],
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                            type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: [
+                        {
+                            type: 'category',
+                            data: time,
+                            axisTick: {
+                                alignWithLabel: true
+                            }
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value'
+                        }
+                    ],
+                    series: [
+                        {
+                            name: '阅读时长',
+                            type: 'bar',
+                            barWidth: '60%',
+                            data: data
+                        }
+                    ]
+                };
+                echarts.init(document.getElementById("weekTimeChart")).setOption(option);
             }
         });
     }
