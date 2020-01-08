@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>添加阅读记录</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
+</head>
+<body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">阅读管理后台</a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="/book/static/index.html">阅读统计</a></li>
+            <li><a href="/book/static/addBook.html">添加阅读记录</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container" style="width: 100%">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">添加阅读图书</h3>
+          </div>
+          <div class="panel-body">
+            <table class="table table-bordered" style="width: 100%">
+                <tr>
+                    <td>书名</td>
+                    <td><input id="addBookName" type="text" class="form-control"/></td>
+                </tr>
+                <tr style="display: none">
+                    <td colspan="2" id="bookList"></td>
+                </tr>
+                <tr>
+                    <td>字数</td>
+                    <td><input id="addBookWordCount" type="number" class="form-control"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><button id="addBookBtn" style="width: 100%" class="btn btn-primary">提交</button></td>
+                </tr>
+                <tr>
+                    <td colspan="2" id="addBookMsg"></td>
+                </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">添加每周时长</h3>
+          </div>
+          <div class="panel-body">
+            <table class="table table-bordered" style="width: 100%">
+                <tr>
+                    <td style="width: 150px"><input id="weekDate" class="form-control" type="text" placeholder="20200101" id="timeInWeek"/></td>
+                    <td>
+                        <input id="weekHour" class="form-control" type="number" placeholder="时" id="timeHour"/>时
+                        <input id="weekMin" class="form-control" type="number" placeholder="分钟" id="timeMin"/>分钟
+                    </td>
+                    <td><button id="addWeekTimeBtn" class="btn btn-primary">提交</button></td>
+                </tr>
+            </table>
+          </div>
+        </div>
+
+        <div id="notFinishedBookPanel" class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">未读完列表</h3>
+          </div>
+          <div class="panel-body" style="padding: 0;">
+            <table id="notFinishBookList" class="table table-bordered" style="width: 100%">
+
+            </table>
+          </div>
+        </div>
+    </div>
+</body>
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/echarts.common.min.js"></script>
+<script src="/static/js/echarts.min.js"></script>
+<script>
+    var urlPrefix = "/book";
+    urlPrefix = "";
+
+    function setBookName(name){
+        $("#addBookName").val(name);
+    }
+    $("#addBookName").blur(function(){
+        if($("#addBookName").val() != ""){
+            $.ajax({
+                url:urlPrefix + "/getNamesLike",
+                data:"name=" + $("#addBookName").val(),
+                type:"POST",
+                success:function(data){
+                    if(data != ""){
+                        var html = "";
+                        $.each(data,function(i,n){
+                            html += "<span class=\"label label-primary\" onclick='setBookName(\""+n+"\")'>"+n+"</span>&nbsp;&nbsp;";
+                        });
+                        $("#bookList").html(html);
+                        $("#bookList").parent().show();
+                    }
+                }
+            });
+            $.ajax({
+                url:urlPrefix + "/getByName",
+                data:"name=" + $("#addBookName").val(),
+                type:"POST",
+                success:function(data){
+                    if(data != ""){
+                        $("#addBookWordCount").val(data[0]["wordCount"]);
+                    }
+                }
+            });
+        }
+    });
+
+    $("#addBookBtn").click(function(){
+        $.ajax({
+            url:urlPrefix + "/addBook",
+            data:"name=" + $("#addBookName").val() + "&wordCount=" + $("#addBookWordCount").val(),
+            type:"POST",
+            beforeSend:function(){
+                $("#addBookMsg").html("");
+            },
+            success:function(data){
+                $("#addBookMsg").html(data);
+                getNotFinishBook();
+            }
+        });
+    });
+
+    getNotFinishBook();
+
+    function bookFinish(id){
+        $.ajax({
+            url:urlPrefix + "/setBookFinished",
+            data:"id=" + id,
+            type:"POST",
+            success:function(data){
+                getNotFinishBook();
+            }
+        });
+    }
+
+    function getNotFinishBook(){
+        $.ajax({
+            url:urlPrefix + "/getNotFinishBook",
+            type:"POST",
+            success:function(data){
+                if(data.length > 0){
+                    var html = "<tr><th>书名</th><th>开始阅读时间</th><th>操作</th></tr>";
+                    $.each(data, function(i, n){
+                        html += "<tr>";
+                        html += "<td>"+n["name"]+"</td><td>"+n["startTime"]+"</td><td><button class='btn btn-primary' onclick='bookFinish("+n["id"]+")'>完成</button></td>";
+                        html += "</tr>";
+                    });
+                    $("#notFinishBookList").html(html);
+                    $("#notFinishedBookPanel").show();
+                }else{
+                    $("#notFinishedBookPanel").hide();
+                }
+            }
+        });
+    }
+
+    $("#addWeekTimeBtn").click(function(){
+        $.ajax({
+            url:urlPrefix + "/addWeekTime",
+            type:"POST",
+            data:"date=" + $("#weekDate").val() + "&hour="+$("#weekHour").val() + "&min="+$("#weekMin").val(),
+            success:function(data){
+
+            }
+        });
+    });
+</script>
+</html>
