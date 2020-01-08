@@ -3,3 +3,6 @@ class gloVar():
     dbName = ""
     dbPwd = ""
     dbUser = ""
+    goal = ""
+    goalStartTime = ""
+    goalEndTime = ""

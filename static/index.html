@@ -27,7 +27,21 @@
       </div>
     </nav>
     <div class="container" style="width: 100%">
-
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">目标</h3>
+          </div>
+          <div class="panel-body" style="padding: 0">
+            <table class="table table-bordered" style="width: 100%;margin-bottom: 0">
+                <tr>
+                    <td id="goalMsg"></td>
+                </tr>
+                <tr>
+                    <td id="goalProcess"></td>
+                </tr>
+            </table>
+          </div>
+        </div>
     </div>
 </body>
 <script src="/static/js/jquery.min.js"></script>
@@ -35,5 +49,24 @@
 <script src="/static/js/echarts.common.min.js"></script>
 <script src="/static/js/echarts.min.js"></script>
 <script>
+    var urlPrefix = "/book";
+    urlPrefix = "";
+
+    getGoal();
+
+    function getGoal(){
+        $.ajax({
+            url:urlPrefix + "/getGoal",
+            type:"POST",
+            success:function(data){
+                $("#goalMsg").html("目标：从" + data["start"].split(" ")[0] + "到" + data["end"].split(" ")[0]+"，读完" + data["goal"] + "本书");
+                $("#goalProcess").html("<div class=\"progress\">\n" +
+                    "  <div class=\"progress-bar progress-bar-striped active\" role=\"progressbar\" aria-valuenow=\""+data["percent"]+"\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: "+data["percent"]+"%\">\n" +
+                    +data["percent"]+"%\n" +
+                    "  </div>\n" +
+                    "</div>");
+            }
+        });
+    }
 </script>
 </html>

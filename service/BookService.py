@@ -84,6 +84,23 @@ def insert(name,wordCount,isNew):
     db.close()
 
 
+def getFinishedCount(startTime, endTime):
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "select count(id) from book where finishTime is not null and finishTime > '"+startTime+"' and finishTime < '"+endTime+"'"
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    db.commit()
+    db.close()
+    return data[0][0]
+
+
 def changeToJsonStr(fields,data):
     finalResult = "["
     column_list = []

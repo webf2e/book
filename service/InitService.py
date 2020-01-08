@@ -10,3 +10,6 @@ def init():
     gloVar.dbUser = conf.get('MysqlConfig', 'user')
     gloVar.dbPwd = conf.get('MysqlConfig', 'password')
     gloVar.dbName = conf.get('MysqlConfig', 'db')
+    gloVar.goal = conf.get('goal', 'goal')
+    gloVar.goalStartTime = conf.get('goal', 'start')
+    gloVar.goalEndTime = conf.get('goal', 'end')

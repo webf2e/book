@@ -1,9 +1,11 @@
 from flask import Flask
 from router.AddBookRouter import addBookRoute
+from router.IndexRouter import indexRoute
 from service import InitService
 
 app = Flask(__name__)
 app.register_blueprint(addBookRoute)
+app.register_blueprint(indexRoute)
 
 InitService.init()
 
