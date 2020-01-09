@@ -43,7 +43,17 @@
           </div>
         </div>
 
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">上周统计</h3>
+          </div>
+          <div class="panel-body" style="padding: 0">
+          </div>
+        </div>
+
         <div id="weekTimeChart" style="width: 100%;height: 350px"></div>
+        <hr/>
+        <div id="readCountMonthlyChart" style="width: 100%;height: 350px"></div>
     </div>
 </body>
 <script src="/static/js/jquery.min.js"></script>
@@ -57,6 +67,8 @@
     getGoal();
 
     getWeeks();
+
+    getReadCountMonthlyByTime();
 
     function getGoal(){
         $.ajax({
@@ -82,12 +94,9 @@
                 var time = [];
                 var data = [];
                 $.each(result, function(i,n){
-                    console.log(n);
                     time.push(n["endTime"]);
                     data.push(n["readMin"]);
                 });
-                console.log(time);
-                console.log(data);
                 var option = {
                     title: {
                         text: '每周读书时长统计',
@@ -129,6 +138,85 @@
                     ]
                 };
                 echarts.init(document.getElementById("weekTimeChart")).setOption(option);
+            }
+        });
+    }
+
+    function getReadCountMonthlyByTime(){
+        $.ajax({
+            url:urlPrefix + "/getReadCountMonthlyByTime",
+            type:"POST",
+            success:function(result){
+                var yearMonths = [];
+                var newCountMap = {};
+                var oldCountMap = {};
+                $.each(result, function(i,n){
+                    var yearMonth = n["yearMonth"];
+                    if(yearMonths.indexOf(yearMonth) == -1){
+                        yearMonths.push(yearMonth);
+                    }
+                    if(n["isNew"] == "1"){
+                        newCountMap[yearMonth] = n["count"];
+                    }else{
+                        oldCountMap[yearMonth] = n["count"];
+                    }
+                });
+                var newReadList = [];
+                var oldReadList = [];
+                for(var i  = 0;i < yearMonths.length;i ++){
+                    var yearMonth = yearMonths[i];
+                    if(newCountMap[yearMonth] != undefined){
+                        newReadList.push(newCountMap[yearMonth]);
+                    }else{
+                        newReadList.push(0);
+                    }
+                    if(oldCountMap[yearMonth] != undefined){
+                        oldReadList.push(oldCountMap[yearMonth]);
+                    }else{
+                        oldReadList.push(0);
+                    }
+                }
+                var option = {
+                    title: {
+                        text: '每月读书数量统计',
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['新读数量', '重复读数']
+                    },
+                    calculable: true,
+                    xAxis: [
+                        {
+                            type: 'category',
+                            data: yearMonths
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value'
+                        }
+                    ],
+                    series: [
+                        {
+                            name: '新读数量',
+                            type: 'bar',
+                            data: newReadList,
+                            markLine: {
+                                data: [
+                                    {type: 'average', name: '平均值'}
+                                ]
+                            }
+                        },
+                        {
+                            name: '重复读数',
+                            type: 'bar',
+                            data: oldReadList
+                        }
+                    ]
+                };
+                echarts.init(document.getElementById("readCountMonthlyChart")).setOption(option);
             }
         });
     }

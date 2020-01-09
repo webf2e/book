@@ -183,9 +183,15 @@
             success:function(data){
                 if(data.length > 0){
                     var html = "<tr><th>书名</th><th>开始阅读时间</th><th>操作</th></tr>";
+                    var clazz = "";
                     $.each(data, function(i, n){
+                        if(n["isNew"] == 1){
+                            clazz = "btn-primary";
+                        }else{
+                            clazz = "btn-info";
+                        }
                         html += "<tr>";
-                        html += "<td>"+n["name"]+"</td><td>"+n["startTime"]+"</td><td><button class='btn btn-primary' onclick='bookFinish("+n["id"]+")'>完成</button></td>";
+                        html += "<td>"+n["name"]+"</td><td>"+n["startTime"]+"</td><td><button class='btn "+clazz+"' onclick='bookFinish("+n["id"]+")'>完成</button></td>";
                         html += "</tr>";
                     });
                     $("#notFinishBookList").html(html);

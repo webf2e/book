@@ -45,7 +45,7 @@ def getNotFinishBook():
         database=gloVar.dbName
     )
     cursor = db.cursor()
-    sql = "select id,name,startTime from book where finishTime is null order by startTime asc"
+    sql = "select * from book where finishTime is null order by startTime asc"
     logging.warning("[sql]:{}".format(sql))
     cursor.execute(sql)
     data = cursor.fetchall()
@@ -131,6 +131,75 @@ def getFinishedCount(startTime, endTime):
     db.close()
     return data[0][0]
 
+
+def getBooks(startTime, endTime):
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "select * from book where (finishTime > '"+startTime+"' and finishTime < '"+endTime+"') or (startTime > '"+startTime+"' and startTime < '"+endTime+"')"
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    fields = cursor.description
+    db.commit()
+    db.close()
+    return changeToJsonStr(fields, data)
+
+def getStartReadBooks(startTime, endTime):
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "select * from book where startTime > '"+startTime+"' and startTime < '"+endTime+"'"
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    fields = cursor.description
+    db.commit()
+    db.close()
+    return changeToJsonStr(fields, data)
+
+def getFinishReadBooks(startTime, endTime):
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "select * from book where finishTime > '"+startTime+"' and finishTime < '"+endTime+"'"
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    fields = cursor.description
+    db.commit()
+    db.close()
+    return changeToJsonStr(fields, data)
+
+
+def getReadCountMonthlyByTime(startTime):
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "select date_format(finishTime, '%Y-%m') yearMonth, count(id) count, isNew from book where finishTime is not null and finishTime > '"+startTime+"' GROUP BY yearMonth,isNew order by yearMonth"
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    fields = cursor.description
+    db.commit()
+    db.close()
+    return changeToJsonStr(fields, data)
 
 def changeToJsonStr(fields,data):
     finalResult = "["
