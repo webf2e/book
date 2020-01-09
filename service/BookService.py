@@ -11,7 +11,7 @@ def getNamesLike(name):
         database=gloVar.dbName
     )
     cursor = db.cursor()
-    sql = "SELECT name FROM book where name like '%"+name+"%'"
+    sql = "SELECT name FROM book where lowName like '%"+name+"%'"
     logging.warning("[sql]:{}".format(sql))
     cursor.execute(sql)
     data = cursor.fetchall()
@@ -19,7 +19,7 @@ def getNamesLike(name):
     db.close()
     return data
 
-def getByName(name):
+def getByLowName(name):
     db = mysql.connector.connect(
         host=gloVar.dbHost,
         user=gloVar.dbUser,
@@ -27,7 +27,7 @@ def getByName(name):
         database=gloVar.dbName
     )
     cursor = db.cursor()
-    sql = "select * from book where name = '"+name+"'"
+    sql = "select * from book where lowName = '"+name+"'"
     logging.warning("[sql]:{}".format(sql))
     cursor.execute(sql)
     data = cursor.fetchall()
@@ -54,6 +54,23 @@ def getNotFinishBook():
     db.close()
     return changeToJsonStr(fields, data)
 
+def getRecentBookList():
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "select * from book order by startTime desc limit 0,20"
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    fields = cursor.description
+    db.commit()
+    db.close()
+    return changeToJsonStr(fields, data)
+
 
 def setBookFinished(id):
     db = mysql.connector.connect(
@@ -69,7 +86,7 @@ def setBookFinished(id):
     db.commit()
     db.close()
 
-def insert(name,wordCount,isNew):
+def setWordCount(id, wordCount):
     db = mysql.connector.connect(
         host=gloVar.dbHost,
         user=gloVar.dbUser,
@@ -77,7 +94,21 @@ def insert(name,wordCount,isNew):
         database=gloVar.dbName
     )
     cursor = db.cursor()
-    sql = "insert into book(name,isNew,startTime,wordCount) values ('"+name+"',"+str(isNew)+",now(),"+str(wordCount)+")"
+    sql = "update book set wordCount = "+wordCount+" where id = " + id
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    db.commit()
+    db.close()
+
+def insert(name, lowName, wordCount, isNew):
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "insert into book(name,lowName,isNew,startTime,wordCount) values ('"+name+"','"+lowName+"',"+str(isNew)+",now(),"+str(wordCount)+")"
     logging.warning("[sql]:{}".format(sql))
     cursor.execute(sql)
     db.commit()

@@ -56,6 +56,26 @@
 
         <div class="panel panel-default">
           <div class="panel-heading">
+            <h3 class="panel-title">修改字数</h3>
+          </div>
+          <div class="panel-body">
+            <table class="table table-bordered" style="width: 100%">
+                <tr>
+                    <td style="width: 60%"><select class="form-control" id="setWordCountbookList"></select></td>
+                    <td><input type="text" id="newWordCount" class="form-control"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><button id="setWordCountBtn" class="btn btn-primary" style="width: 100%">修改字数</button></td>
+                </tr>
+                <tr>
+                    <td colspan="2" id="setWordCountMsg"></td>
+                </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
             <h3 class="panel-title">添加每周时长</h3>
           </div>
           <div class="panel-body">
@@ -184,6 +204,38 @@
             data:"date=" + $("#weekDate").val() + "&hour="+$("#weekHour").val() + "&min="+$("#weekMin").val(),
             success:function(data){
                 $("#addWeekMsg").html("添加成功");
+            }
+        });
+    });
+
+    getRecentBookList();
+
+    function getRecentBookList(){
+        $.ajax({
+            url:urlPrefix + "/getRecentBookList",
+            type:"POST",
+            success:function(data){
+                var html = "<option value='0'>请选择书籍</option>";
+                var name2Word = {};
+                $.each(data,function(i,n){
+                    html += "<option value='"+n["id"]+"'>"+n["name"]+"</option>";
+                    name2Word[n["id"]] = n["wordCount"];
+                });
+                $("#setWordCountbookList").html(html);
+                $("#setWordCountbookList").change(function(){
+                    $("#newWordCount").val(name2Word[$(this).val()]);
+                });
+            }
+        });
+    }
+
+    $("#setWordCountBtn").click(function(){
+        $.ajax({
+            url:urlPrefix + "/setWordCount",
+            type:"POST",
+            data:"id=" + $("#setWordCountbookList").val() + "&wordCount="+$("#newWordCount").val(),
+            success:function(data){
+                $("#setWordCountMsg").html("修改字数成功");
             }
         });
     });
