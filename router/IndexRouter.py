@@ -33,7 +33,7 @@ def getReadCountMonthlyByTime():
 @indexRoute.route('/lastWeekTongji',methods=["POST"])
 def lastWeekTongji():
     lastWeekInfo = {}
-    now = datetime.datetime.now()-datetime.timedelta(days=123)
+    now = datetime.datetime.now()
     lastWeekStart = datetime.datetime.strftime(now - datetime.timedelta(days=now.weekday() + 7), "%Y-%m-%d")
     lastWeekEnd = datetime.datetime.strftime(now - datetime.timedelta(days=now.weekday()+1), "%Y-%m-%d")
     weekReadTime = json.loads(WeekReadTimeService.getByStartTime(lastWeekStart))
