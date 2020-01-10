@@ -47,7 +47,7 @@
           <div class="panel-heading">
             <h3 class="panel-title">上周统计</h3>
           </div>
-          <div class="panel-body" style="padding: 0">
+          <div class="panel-body" id="lastWeekContent">
           </div>
         </div>
 
@@ -69,6 +69,8 @@
     getWeeks();
 
     getReadCountMonthlyByTime();
+
+    lastWeekTongji();
 
     function getGoal(){
         $.ajax({
@@ -217,6 +219,78 @@
                     ]
                 };
                 echarts.init(document.getElementById("readCountMonthlyChart")).setOption(option);
+            }
+        });
+    }
+
+    function lastWeekTongji(){
+        $.ajax({
+            url:urlPrefix + "/lastWeekTongji",
+            type:"POST",
+            success:function(data){
+                var html = "";
+                if(data["totalReadTime"] != undefined){
+                    var readTotalTime = "";
+                    var t = data["totalReadTime"] * 1;
+                    if(t < 60){
+                        readTotalTime = t + "分";
+                    }else{
+                        var hour = parseInt(t / 60);
+                        if(t % 60 == 0){
+                            readTotalTime = hour + "时";
+                        }else{
+                            if(t % 60 < 10){
+                                readTotalTime = hour + "时 0" + (t % 60) + "分";
+                            }else{
+                                readTotalTime = hour + "时 " + (t % 60) + "分";
+                            }
+                        }
+                    }
+
+                    var readTotalTimeDaily = "";
+                    var tDaily = data["avgReadTimeDaily"] * 1;
+                    if(tDaily < 60){
+                        readTotalTimeDaily = tDaily + "分";
+                    }else{
+                        var hour = parseInt(tDaily / 60);
+                        if(tDaily % 60 == 0){
+                            readTotalTimeDaily = hour + "时";
+                        }else{
+                            if(tDaily % 60 < 10){
+                                readTotalTimeDaily = hour + "时 0" + (tDaily % 60) + "分";
+                            }else{
+                                readTotalTimeDaily = hour + "时 " + (tDaily % 60) + "分";
+                            }
+                        }
+                    }
+                    html += "上周共阅读 <span class=\"label label-primary\">"+readTotalTime+"</span>，";
+                    html += "每天阅读 <span class=\"label label-primary\">"+readTotalTimeDaily+"</span><hr style='margin-top:7px;margin-bottom:7px'/>";
+                    if(data["finishReadBooks"].length > 0){
+                        html += "上周总共读完了 "+data["finishReadBooks"].length+" 本书<br>";
+                        $.each(data["finishReadBooks"],function(i,n){
+                            if(n["isNew"] == "1"){
+                                html += "<div class=\"alert alert-info\" role=\"alert\" style='margin-bottom:0;margin-top:7px;padding:5px;padding-left:15px'>"+n["name"]+"<span class=\"label label-danger\" style='float:right'>New</span></div>";
+                            }else{
+                                html += "<div class=\"alert alert-info\" role=\"alert\" style='margin-bottom:0;margin-top:7px;padding:5px;padding-left:15px'>"+n["name"]+"</div> ";
+                            }
+                        });
+                    }
+                    if(data["startReadBooks"].length > 0){
+                        html += "<hr style='margin-top:7px;margin-bottom:7px'/>";
+                        html += "上周总共开始读了 "+data["startReadBooks"].length+" 本书<br>";
+                        $.each(data["startReadBooks"],function(i,n){
+                            if(n["isNew"] == "1"){
+                                html += "<div class=\"alert alert-info\" role=\"alert\" style='margin-bottom:0;margin-top:7px;padding:5px;padding-left:15px'>"+n["name"]+"<span class=\"label label-danger\" style='float:right'>New</span></div>";
+                            }else{
+                                html += "<div class=\"alert alert-info\" role=\"alert\" style='margin-bottom:0;margin-top:7px;padding:5px;padding-left:15px'>"+n["name"]+"</div> ";
+                            }
+                        });
+                    }
+                }else{
+                    html = "<span style='color:#a94442'>上周没有读书</span>";
+                    $("#lastWeekContent").parent().removeClass("panel-default").addClass("panel-danger");
+                }
+                $("#lastWeekContent").html(html);
             }
         });
     }
