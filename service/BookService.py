@@ -201,6 +201,90 @@ def getReadCountMonthlyByTime(startTime):
     db.close()
     return changeToJsonStr(fields, data)
 
+def getNoImgBooks():
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "select * from book where bookImg is null order by startTime desc"
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    fields = cursor.description
+    db.commit()
+    db.close()
+    return changeToJsonStr(fields, data)
+
+def getNotRereadBook():
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "select name from (select name,count(name) as count,startTime from book where finishTime is not null  GROUP BY name,startTime order by startTime desc) a where count = 1 limit 0,5"
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    datas = cursor.fetchall()
+    data = []
+    for d in datas:
+        data.append(d[0])
+    db.commit()
+    db.close()
+    return data
+
+def getById(id):
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "select * from book where id = {}".format(id)
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    fields = cursor.description
+    db.commit()
+    db.close()
+    return changeToJsonStr(fields, data)
+
+def getByPage(pageIndex, pageSize):
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "select * from book order by startTime desc limit {},{}".format((pageIndex - 1) * pageSize, pageSize)
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    fields = cursor.description
+    db.commit()
+    db.close()
+    return changeToJsonStr(fields, data)
+
+def updateBookImg(lowName, img):
+    db = mysql.connector.connect(
+        host=gloVar.dbHost,
+        user=gloVar.dbUser,
+        passwd=gloVar.dbPwd,
+        database=gloVar.dbName
+    )
+    cursor = db.cursor()
+    sql = "update book set bookImg = '{}' where lowName = '{}'".format(img, lowName)
+    logging.warning("[sql]:{}".format(sql))
+    cursor.execute(sql)
+    db.commit()
+    db.close()
+
 def changeToJsonStr(fields,data):
     finalResult = "["
     column_list = []

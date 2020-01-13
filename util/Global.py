@@ -6,3 +6,4 @@ class gloVar():
     goal = ""
     goalStartTime = ""
     goalEndTime = ""
+    bookImgDir = ""

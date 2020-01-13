@@ -13,3 +13,4 @@ def init():
     gloVar.goal = conf.get('goal', 'goal')
     gloVar.goalStartTime = conf.get('goal', 'start')
     gloVar.goalEndTime = conf.get('goal', 'end')
+    gloVar.bookImgDir = conf.get('book', 'imgDir')

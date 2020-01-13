@@ -1,7 +1,8 @@
 from flask import Blueprint,Response,request
 from service import BookService,WeekReadTimeService
-import json,datetime
+import json,datetime,os
 from datetime import timedelta
+from util.Global import gloVar
 
 addBookRoute = Blueprint('addBookRoute', __name__)
 
@@ -89,3 +90,32 @@ def addWeekTime():
         # 不存在，添加
         WeekReadTimeService.insert(startTime, endTime, totalMin)
     return "OK"
+
+@addBookRoute.route('/getNoImgBooks',methods=["POST"])
+def getNoImgBooks():
+    return Response(BookService.getNoImgBooks(), mimetype='application/json')
+
+
+@addBookRoute.route('/getNotRereadBook',methods=["POST"])
+def getNotRereadBook():
+    return Response(json.dumps(BookService.getNotRereadBook()), mimetype='application/json')
+
+
+@addBookRoute.route('/upBookImg',methods=["POST"])
+def upBookImg():
+    #先判断文件夹下有没有文件，如果有就等一下
+    fileName = str(dict(request.files)["bookImg"]).split("FileStorage: '")[1].split("' ('")[0]
+    id = request.form.get("id")
+    print("上传的图书图片为：{}, id为：{}".format(fileName, id))
+    #先判断文件夹是否存在
+    filePath = os.path.join(gloVar.bookImgDir)
+    if not os.path.exists(filePath):
+        os.makedirs(filePath)
+    request.files["bookImg"].save(os.path.join(gloVar.bookImgDir, fileName))
+    # 记录数据库
+    url = "/static/bookImg/{}".format(fileName)
+    books = json.loads(BookService.getById(id))
+    if len(books) > 0:
+        book = books[0]
+        BookService.updateBookImg(book["lowName"], url)
+    return '上传成功'

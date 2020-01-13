@@ -22,6 +22,7 @@
           <ul class="nav navbar-nav">
             <li><a href="/book/static/index.html">阅读统计</a></li>
             <li><a href="/book/static/addBook.html">添加阅读记录</a></li>
+            <li><a href="/book/static/his.html">阅读记录</a></li>
           </ul>
         </div>
       </div>
@@ -33,6 +34,10 @@
           </div>
           <div class="panel-body">
             <table class="table table-bordered" style="width: 100%">
+                <tr>
+                    <td>推荐</td>
+                    <td id="recommandBook"></td>
+                </tr>
                 <tr>
                     <td>书名</td>
                     <td><input id="addBookName" type="text" class="form-control"/></td>
@@ -51,6 +56,28 @@
                     <td colspan="2" id="addBookMsg"></td>
                 </tr>
             </table>
+          </div>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">上传图片</h3>
+          </div>
+          <div class="panel-body">
+                <table class="table table-bordered" style="width: 100%">
+                    <form id="uploadForm" enctype="multipart/form-data" >
+                    <tr>
+                        <td style="width: 60%"><select class="form-control" id="noImgBooks" name="id"></select></td>
+                        <td><input class="form-control" type="file" name="bookImg"></td>
+                    </tr>
+                    </form>
+                    <tr>
+                        <td colspan="2"><button id="addBookImgBtn" class="btn btn-primary" style="width: 100%">上传照片</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" id="uploadBookImgMsg"></td>
+                    </tr>
+                </table>
           </div>
         </div>
 
@@ -118,6 +145,66 @@
     function setBookName(name){
         $("#addBookName").val(name);
     }
+
+    function recommand(name){
+        $("#addBookName").val(name);
+    }
+
+    function getNotRereadBook(){
+        $.ajax({
+            url:urlPrefix + "/getNotRereadBook",
+            type:"POST",
+            success:function(data){
+                var html ="";
+                $.each(data,function(i,n){
+                    html += "<span class=\"label label-primary\" onclick='recommand(\""+n+"\")'>"+n+"</span> ";
+                });
+                $("#recommandBook").html(html);
+            }
+        });
+    }
+
+
+    getNotRereadBook();
+
+    loadNoImgBook();
+
+    function loadNoImgBook(){
+        $.ajax({
+            url:urlPrefix + "/getNoImgBooks",
+            type:"POST",
+            success:function(data){
+                var html ="<option>没有设置图片的图书列表</option>";
+                $.each(data,function(i,n){
+                    html += "<option value='"+n["id"]+"'>"+n["name"]+"</option>";
+                });
+                $("#noImgBooks").html(html);
+            }
+        });
+    }
+
+    $("#addBookImgBtn").click(function(){
+        alert(new FormData($('#uploadForm')[0]));
+        $.ajax({
+            url:urlPrefix + "/upBookImg",
+            type: "POST",
+            data: new FormData($('#uploadForm')[0]),
+            async: true,
+            cashe: false,
+            contentType:false,
+            processData:false,
+            beforeSend:function(){
+                $("#uploadBookImgMsg").html("正在上传...");
+            },
+            success:function (returndata) {
+                $("#uploadBookImgMsg").html("上传成功");
+            },
+        　　 error: function (returndata) {
+                $("#uploadBookImgMsg").html("上传失败");
+            }
+        });
+    });
+
     $("#addBookName").blur(function(){
         if($("#addBookName").val() != ""){
             $.ajax({
@@ -159,6 +246,7 @@
             success:function(data){
                 $("#addBookMsg").html(data);
                 getNotFinishBook();
+                loadNoImgBook();
             }
         });
     });
