@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>阅读记录</title>
     <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/default.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/component.css" />
+    <link rel="stylesheet" type="text/css" href="/book/static/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/book/static/css/component.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
 </head>
 <body>
@@ -39,11 +39,10 @@
 <script src="/static/js/bootstrap.min.js"></script>
 <script src="/static/js/echarts.common.min.js"></script>
 <script src="/static/js/echarts.min.js"></script>
-<script src="/static/js/modernizr.custom.js"></script>
+<script src="/book/static/js/modernizr.custom.js"></script>
 <script>
     var pageIndex = 1;
     var urlPrefix = "/book";
-    urlPrefix = "";
 
     getByPageIndex();
 
@@ -64,7 +63,7 @@
                             img = "<table style='width:100%;margin-bottom:8px'><tr><td align='center'><img src='"+n["bookImg"]+"' width='108px' height='155px'/></td></tr></table>";
                         }
                         var isNew = "";
-                        if(n["isNew"] != "1"){
+                        if(n["isNew"] == "1"){
                             isNew = "<span class=\"label label-danger\">首次阅读</span>";
                         }
                         var msg = "<b>从 " + n["startTime"] + " 开始阅读";
