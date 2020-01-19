@@ -157,7 +157,7 @@ def getStartReadBooks(startTime, endTime):
         database=gloVar.dbName
     )
     cursor = db.cursor()
-    sql = "select * from book where finishTime is null and startTime > '"+startTime+"' and startTime < '"+endTime+"' order by startTime asc"
+    sql = "select * from book where startTime > '"+startTime+"' and startTime < '"+endTime+"' order by startTime asc"
     logging.warning("[sql]:{}".format(sql))
     cursor.execute(sql)
     data = cursor.fetchall()
