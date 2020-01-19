@@ -113,7 +113,7 @@ def upBookImg():
         os.makedirs(filePath)
     request.files["bookImg"].save(os.path.join(gloVar.bookImgDir, fileName))
     # 记录数据库
-    url = "/static/bookImg/{}".format(fileName)
+    url = "/book/static/bookImg/{}".format(fileName)
     books = json.loads(BookService.getById(id))
     if len(books) > 0:
         book = books[0]
