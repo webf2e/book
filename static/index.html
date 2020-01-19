@@ -53,6 +53,7 @@
         </div>
 
         <div id="weekTimeChart" style="width: 100%;height: 350px"></div>
+        <div id="weekDataDetail"></div>
         <hr/>
         <div id="readCountMonthlyChart" style="width: 100%;height: 350px"></div>
     </div>
@@ -72,6 +73,26 @@
     getReadCountMonthlyByTime();
 
     lastWeekTongji();
+
+    function formatMinToHour(t){
+        t = t * 1;
+        var readTotalTime = "";
+        if(t < 60){
+            readTotalTime = t + "分";
+        }else{
+            var hour = parseInt(t / 60);
+            if(t % 60 == 0){
+                readTotalTime = hour + "时";
+            }else{
+                if(t % 60 < 10){
+                    readTotalTime = hour + "时0" + (t % 60) + "分";
+                }else{
+                    readTotalTime = hour + "时" + (t % 60) + "分";
+                }
+            }
+        }
+        return readTotalTime;
+    }
 
     function getGoal(){
         $.ajax({
@@ -109,6 +130,9 @@
                         trigger: 'axis',
                         axisPointer: {            // 坐标轴指示器，坐标轴触发有效
                             type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                        },
+                        formatter:function(data){
+                            return "阅读 "+formatMinToHour(data[0]["data"]);
                         }
                     },
                     grid: {
@@ -138,9 +162,53 @@
                             barWidth: '60%',
                             data: data
                         }
-                    ]
+                    ],
                 };
-                echarts.init(document.getElementById("weekTimeChart")).setOption(option);
+                var weeklyCharts = echarts.init(document.getElementById("weekTimeChart"));
+                weeklyCharts.setOption(option);
+                //点击事件
+                weeklyCharts.on('click', function(params) {
+                    $.ajax({
+                        url:urlPrefix + "/getWeekData",
+                        data:"week=" + params["name"],
+                        type:"POST",
+                        success:function(data){
+                            var html = "";
+                            if(data["totalReadTime"] != undefined){
+                                html += "<div class=\"panel panel-default\"><div class=\"panel-heading\">";
+                                html += "<h3 class=\"panel-title\">"+data["startTime"]+"到"+data["endTime"]+"</h3>";
+                                html += "</div><div class=\"panel-body\">";
+                                var readTotalTime = formatMinToHour(data["totalReadTime"]);
+                                var readTotalTimeDaily = formatMinToHour(data["avgReadTimeDaily"]);
+                                html += "共阅读 <span class=\"label label-primary\">"+readTotalTime+"</span>，";
+                                html += "每天阅读 <span class=\"label label-primary\">"+readTotalTimeDaily+"</span>";
+                                if(data["finishReadBooks"].length > 0){
+                                    html += "<hr style='margin-top:7px;margin-bottom:7px'/>总共读完了 "+data["finishReadBooks"].length+" 本书<br>";
+                                    $.each(data["finishReadBooks"],function(i,n){
+                                        if(n["isNew"] == "1"){
+                                            html += "<div class=\"alert alert-info\" role=\"alert\" style='margin-bottom:0;margin-top:7px;padding:5px;padding-left:15px'>"+n["name"]+"<span class=\"label label-danger\" style='float:right'>New</span></div>";
+                                        }else{
+                                            html += "<div class=\"alert alert-info\" role=\"alert\" style='margin-bottom:0;margin-top:7px;padding:5px;padding-left:15px'>"+n["name"]+"</div> ";
+                                        }
+                                    });
+                                }
+                                if(data["startReadBooks"].length > 0){
+                                    html += "<hr style='margin-top:7px;margin-bottom:7px'/>";
+                                    html += "总共开始读了 "+data["startReadBooks"].length+" 本书<br>";
+                                    $.each(data["startReadBooks"],function(i,n){
+                                        if(n["isNew"] == "1"){
+                                            html += "<div class=\"alert alert-info\" role=\"alert\" style='margin-bottom:0;margin-top:7px;padding:5px;padding-left:15px'>"+n["name"]+"<span class=\"label label-danger\" style='float:right'>New</span></div>";
+                                        }else{
+                                            html += "<div class=\"alert alert-info\" role=\"alert\" style='margin-bottom:0;margin-top:7px;padding:5px;padding-left:15px'>"+n["name"]+"</div> ";
+                                        }
+                                    });
+                                }
+                                html += "</div></div>";
+                            }
+                            $("#weekDataDetail").html(html);
+                        }
+                    });
+                });
             }
         });
     }
@@ -181,13 +249,13 @@
                 }
                 var option = {
                     title: {
-                        text: '每月读书数量统计',
+                        text: '每月读书数',
                     },
                     tooltip: {
                         trigger: 'axis'
                     },
                     legend: {
-                        data: ['新读数量', '重复读数']
+                        data: ['新读数量', '重新读数']
                     },
                     calculable: true,
                     xAxis: [
@@ -205,6 +273,7 @@
                         {
                             name: '新读数量',
                             type: 'bar',
+                            stack: 'readCount',
                             data: newReadList,
                             markLine: {
                                 data: [
@@ -213,13 +282,20 @@
                             }
                         },
                         {
-                            name: '重复读数',
+                            name: '重新读数',
                             type: 'bar',
+                            stack: 'readCount',
                             data: oldReadList
                         }
                     ]
                 };
-                echarts.init(document.getElementById("readCountMonthlyChart")).setOption(option);
+                var monthlyCharts = echarts.init(document.getElementById("readCountMonthlyChart"));
+                monthlyCharts.setOption(option);
+                //点击事件
+                monthlyCharts.on('click', function(params) {
+                    console.log(params);
+                    var name = parseInt(params.name);
+                });
             }
         });
     }
@@ -231,43 +307,12 @@
             success:function(data){
                 var html = "";
                 if(data["totalReadTime"] != undefined){
-                    var readTotalTime = "";
-                    var t = data["totalReadTime"] * 1;
-                    if(t < 60){
-                        readTotalTime = t + "分";
-                    }else{
-                        var hour = parseInt(t / 60);
-                        if(t % 60 == 0){
-                            readTotalTime = hour + "时";
-                        }else{
-                            if(t % 60 < 10){
-                                readTotalTime = hour + "时 0" + (t % 60) + "分";
-                            }else{
-                                readTotalTime = hour + "时 " + (t % 60) + "分";
-                            }
-                        }
-                    }
-
-                    var readTotalTimeDaily = "";
-                    var tDaily = data["avgReadTimeDaily"] * 1;
-                    if(tDaily < 60){
-                        readTotalTimeDaily = tDaily + "分";
-                    }else{
-                        var hour = parseInt(tDaily / 60);
-                        if(tDaily % 60 == 0){
-                            readTotalTimeDaily = hour + "时";
-                        }else{
-                            if(tDaily % 60 < 10){
-                                readTotalTimeDaily = hour + "时 0" + (tDaily % 60) + "分";
-                            }else{
-                                readTotalTimeDaily = hour + "时 " + (tDaily % 60) + "分";
-                            }
-                        }
-                    }
+                    var readTotalTime = formatMinToHour(data["totalReadTime"]);
+                    var readTotalTimeDaily = formatMinToHour(data["avgReadTimeDaily"]);
                     html += "上周共阅读 <span class=\"label label-primary\">"+readTotalTime+"</span>，";
-                    html += "每天阅读 <span class=\"label label-primary\">"+readTotalTimeDaily+"</span><hr style='margin-top:7px;margin-bottom:7px'/>";
+                    html += "每天阅读 <span class=\"label label-primary\">"+readTotalTimeDaily+"</span>";
                     if(data["finishReadBooks"].length > 0){
-                        html += "上周总共读完了 "+data["finishReadBooks"].length+" 本书<br>";
+                        html += "<hr style='margin-top:7px;margin-bottom:7px'/>上周总共读完了 "+data["finishReadBooks"].length+" 本书<br>";
                         $.each(data["finishReadBooks"],function(i,n){
                             if(n["isNew"] == "1"){
                                 html += "<div class=\"alert alert-info\" role=\"alert\" style='margin-bottom:0;margin-top:7px;padding:5px;padding-left:15px'>"+n["name"]+"<span class=\"label label-danger\" style='float:right'>New</span></div>";
@@ -295,5 +340,6 @@
             }
         });
     }
+
 </script>
 </html>

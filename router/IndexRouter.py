@@ -43,3 +43,21 @@ def lastWeekTongji():
     lastWeekInfo["startReadBooks"] = json.loads(BookService.getStartReadBooks(lastWeekStart + " 00:00:00", lastWeekEnd + "23:59:59"))
     lastWeekInfo["finishReadBooks"] = json.loads(BookService.getFinishReadBooks(lastWeekStart + " 00:00:00", lastWeekEnd + "23:59:59"))
     return Response(json.dumps(lastWeekInfo), mimetype='application/json')
+
+
+@indexRoute.route('/getWeekData',methods=["POST"])
+def getWeekData():
+    week = request.form.get("week")
+    weekInfo = {}
+    now = datetime.datetime.strptime(week, "%Y-%m-%d")
+    startTime = datetime.datetime.strftime(now - datetime.timedelta(days=now.weekday()), "%Y-%m-%d")
+    endTime = datetime.datetime.strftime(now + datetime.timedelta(days=6 - now.weekday()), "%Y-%m-%d")
+    weekInfo["startTime"] = startTime
+    weekInfo["endTime"] = endTime
+    weekReadTime = json.loads(WeekReadTimeService.getByStartTime(startTime))
+    if len(weekReadTime) != 0:
+        weekInfo["totalReadTime"] = weekReadTime[0]["readMin"]
+        weekInfo["avgReadTimeDaily"] = int(weekReadTime[0]["readMin"]) // 7
+    weekInfo["startReadBooks"] = json.loads(BookService.getStartReadBooks(startTime + " 00:00:00", endTime + "23:59:59"))
+    weekInfo["finishReadBooks"] = json.loads(BookService.getFinishReadBooks(startTime + " 00:00:00", endTime + "23:59:59"))
+    return Response(json.dumps(weekInfo), mimetype='application/json')
