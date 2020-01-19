@@ -19,6 +19,7 @@ def getNamesLike(name):
     db.close()
     return data
 
+
 def getByLowName(name):
     db = mysql.connector.connect(
         host=gloVar.dbHost,
@@ -54,6 +55,7 @@ def getNotFinishBook():
     db.close()
     return changeToJsonStr(fields, data)
 
+
 def getRecentBookList():
     db = mysql.connector.connect(
         host=gloVar.dbHost,
@@ -86,6 +88,7 @@ def setBookFinished(id):
     db.commit()
     db.close()
 
+
 def setWordCount(id, wordCount):
     db = mysql.connector.connect(
         host=gloVar.dbHost,
@@ -99,6 +102,7 @@ def setWordCount(id, wordCount):
     cursor.execute(sql)
     db.commit()
     db.close()
+
 
 def insert(name, lowName, wordCount, isNew):
     db = mysql.connector.connect(
@@ -149,6 +153,7 @@ def getBooks(startTime, endTime):
     db.close()
     return changeToJsonStr(fields, data)
 
+
 def getStartReadBooks(startTime, endTime):
     db = mysql.connector.connect(
         host=gloVar.dbHost,
@@ -165,6 +170,7 @@ def getStartReadBooks(startTime, endTime):
     db.commit()
     db.close()
     return changeToJsonStr(fields, data)
+
 
 def getFinishReadBooks(startTime, endTime):
     db = mysql.connector.connect(
