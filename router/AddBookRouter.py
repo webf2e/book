@@ -75,9 +75,16 @@ def addWeekTime():
     date = request.form.get("date")
     hour = request.form.get("hour")
     min = request.form.get("min")
+    if hour is None or hour == "":
+        hour = "0"
+    if min is None or min == "":
+        min = "0"
     if date is None or date == "":
         dt = datetime.datetime.now()
     else:
+        date = str(date).strip()
+        if len(date) != 8:
+            return "error"
         dt = datetime.datetime.strptime(date, "%Y%m%d")
     startTime = datetime.datetime.strftime(dt - timedelta(days=dt.weekday()), "%Y-%m-%d")
     endTime = datetime.datetime.strftime(dt + timedelta(days=6-dt.weekday()), "%Y-%m-%d")

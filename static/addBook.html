@@ -297,7 +297,12 @@
             type:"POST",
             data:"date=" + $("#weekDate").val() + "&hour="+$("#weekHour").val() + "&min="+$("#weekMin").val(),
             success:function(data){
-                $("#addWeekMsg").html("添加成功");
+                if("OK" == data){
+                    $("#addWeekMsg").html("添加成功");
+                }else{
+                    $("#addWeekMsg").html("添加失败");
+                }
+
             }
         });
     });
