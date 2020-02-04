@@ -40,6 +40,9 @@
                 <tr>
                     <td id="goalProcess"></td>
                 </tr>
+                <tr>
+                    <td id="dayProcess"></td>
+                </tr>
             </table>
           </div>
         </div>
@@ -103,6 +106,12 @@
                 $("#goalProcess").html("<div class=\"progress\">\n" +
                     "  <div class=\"progress-bar progress-bar-striped active\" role=\"progressbar\" aria-valuenow=\""+data["percent"]+"\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: "+data["percent"]+"%\">\n" +
                     +data["percent"]+"%\n" +
+                    "  </div>\n" +
+                    "</div>");
+
+                $("#dayProcess").html("<div class=\"progress\">\n" +
+                    "  <div class=\"progress-bar progress-bar-striped active\" role=\"progressbar\" aria-valuenow=\""+data["dayPercent"]+"\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: "+data["dayPercent"]+"%\">\n" +
+                    +data["dayPercent"]+"%\n" +
                     "  </div>\n" +
                     "</div>");
             }

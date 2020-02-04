@@ -14,6 +14,9 @@ def getGoal():
     goal["end"] = gloVar.goalEndTime
     goal["current"] = int(BookService.getFinishedCount(gloVar.goalStartTime, gloVar.goalEndTime))
     goal["percent"] = str(round(goal["current"] / int(gloVar.goal) * 100, 5))
+    currentDays = datetime.datetime.now().timestamp() - datetime.datetime(datetime.datetime.now().year, 1, 1).timestamp()
+    totalDays = datetime.datetime(datetime.datetime.now().year, 12, 31).timestamp() - datetime.datetime(datetime.datetime.now().year, 1, 1).timestamp()
+    goal["dayPercent"] = str(round(currentDays / totalDays * 100, 5))
     return Response(json.dumps(goal), mimetype='application/json')
 
 
